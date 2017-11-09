@@ -18,17 +18,33 @@ class LapakController extends BaseController
      public function index(){
 		
 	}	
-	public function get_lapak(){
-		$db = DB::table('set_lapak')->select('id_lapak',
-											 'id_pengguna',
-											 'nama_lapak',
-											 'jam_buka',
-											 'jam_tutup')
-									->where('status_lapak','1')
-									->get();
-		return response()->json([
-							'success' => 1,
-							'pesan'   => $db]);
+	public function get_lapak($offset){
+			$offset = isset($offset) && $offset != '' ? $offset : 0;
+			$limit = 10;
+			$db = DB::table('set_lapak');
+			$count = $db->count();
+			$hasil = $db->join('pengguna', 'set_lapak.id_pengguna', '=', 'pengguna.id_pengguna')
+				->select('id_lapak',
+											 'set_lapak.id_pengguna',
+											 'pengguna.nama',
+											 'set_lapak.nama_lapak',
+											 'set_lapak.jam_buka',
+											 'set_lapak.jam_tutup')
+						->where('set_lapak.status_lapak','=','1')
+						->orderBy('set_lapak.id_lapak','desc');
+			
+			if($count<$limit)
+			{
+				if($count==0){$result = "tidak ada data";}
+				else{	
+					$result = $hasil->offset($offset)->limit($count)->get();
+					}
+			}
+			else {
+				$result = $hasil->offset($offset)->limit($limit)->get();	
+			}
+			return response()->json([['success' => 1,'pesan' =>$result]]);	
+						
 	}
 	
 	public function detail_lapak($id){
@@ -36,9 +52,9 @@ class LapakController extends BaseController
 									->where('id_lapak',$id)
 									->where('status_lapak','1')
 									->first();
-		return response()->json([
+		return response()->json([[
 							'success' => 1,
-							'pesan'   => $db]);
+							'pesan'   => $db]]);
 	}
 	
 
@@ -70,17 +86,17 @@ class LapakController extends BaseController
 		$validator = Validator::make($input, $rules,$messsages);
 		
 		if ($validator->fails()) {
-			return response()->json(['success'=>0,  'pesan'=>$validator->messages()->all()]);}
+			return response()->json([['success'=>0,  'pesan'=>$validator->messages()->all()]]);}
 		else {
 		
 		$newkode = AturId::AmbilId('id_lapak','set_lapak','lapak','6','12');	
 		$input['id_lapak'] = $newkode;
 		$hasil = DB::table('set_lapak')->insert($input);	
 		if($hasil){
-			return response()->json(['success' => 1,'pesan' =>'Lapak Berhasil ditambahkan']);		
+			return response()->json([['success' => 1,'pesan' =>'Lapak Berhasil ditambahkan']]);		
 		}
 		else{
-			return response()->json(['success' => 1,'pesan' =>'Lapak gagal ditambahkan']);	
+			return response()->json([['success' => 1,'pesan' =>'Lapak gagal ditambahkan']]);	
 		}
 				
 	}
@@ -92,20 +108,20 @@ class LapakController extends BaseController
 							->update($request->all());	
 			if($db)
 			{	
-				return response()->json(['success'=>1,  'pesan'=>'Data Berhasi diubah']);
+				return response()->json([['success'=>1,  'pesan'=>'Data Berhasi diubah']]);
 			}
 			else{
-				return response()->json(['success'=>0,  'pesan'=>'Gagal Menggubah data']);
+				return response()->json([['success'=>0,  'pesan'=>'Gagal Menggubah data']]);
 			}
 	}
 	public function HapusLapak($id){
 			$db = DB::table('set_lapak');
 			$query = $db->where('id_lapak',$id)->delete();	
 			if($query){				
-				return response()->json(['success'=>1,  'pesan'=>'Data Berhasi dihapus']);
+				return response()->json([['success'=>1,  'pesan'=>'Data Berhasi dihapus']]);
 			}
 			else {
-				return response()->json(['success'=>0,  'pesan'=>'Gagal Menghapus data']);
+				return response()->json([['success'=>0,  'pesan'=>'Gagal Menghapus data']]);
 			}			
 	}
 	

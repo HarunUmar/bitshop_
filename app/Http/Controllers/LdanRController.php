@@ -29,9 +29,9 @@ class LdanRController extends BaseController
 		else {
 			$user = DB::table('pengguna')->where('email',$input['email'])->first();
 			if(Hash::check($request->input('password'), $user->password)){
-				return response()->json(['success'=>1,  'pesan'=>'Login Berhasi']);}
+				return response()->json([['success'=>1,  'pesan'=>'Login Berhasi']]);}
 			else {
-				return response()->json(['success'=>0,  'pesan'=>'Login Gagal']);
+				return response()->json([['success'=>0,  'pesan'=>'Login Gagal']]);
 			}
 		}
 	}
@@ -55,13 +55,13 @@ class LdanRController extends BaseController
 						'password' => 'Required');
 		$validator = Validator::make($input, $rules,$messsages);
 		if ($validator->fails()) {
-			return response()->json(['success'=>0,  'pesan'=>$validator->messages()->all()]);}
+			return response()->json([['success'=>0,  'pesan'=>$validator->messages()->all()]]);}
 		else 
 		{ 	
 		$input['id_pengguna'] = AturId::AmbilId('id_pengguna','pengguna','bit','4','10');	
 		$input['password'] =(new BcryptHasher)->make($input['password']);
 		$daftar = User::create($input);
-		return response()->json(['success' => 1,'pesan' =>'Pendaftaran Berhasil']);}
+		return response()->json([['success' => 1,'pesan' =>'Pendaftaran Berhasil']]);}
 
 	}	
 }
